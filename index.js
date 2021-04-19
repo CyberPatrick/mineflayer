@@ -59,12 +59,14 @@ module.exports = {
 }
 
 function createBot (options = {}) {
-  options.username = options.username || 'Player'
-  options.version = options.version || false
-  options.plugins = options.plugins || {}
-  options.hideErrors = options.hideErrors || true
-  options.logErrors = options.logErrors === undefined ? true : options.logErrors
-  options.loadInternalPlugins = options.loadInternalPlugins !== false
+  options.username = options.username ?? 'Player'
+  options.version = options.version ?? false
+  options.plugins = options.plugins ?? {}
+  options.hideErrors = options.hideErrors ?? true
+  options.logErrors = options.logErrors ?? true
+  options.loadInternalPlugins = options.loadInternalPlugins ?? true
+  options.reconnect = options.reconnect ?? true
+  options.reconnectTimeOut = options.reconnectTimeOut ?? 5000
   const bot = new EventEmitter()
   bot._client = null
   bot.end = () => bot._client.end()
@@ -74,6 +76,9 @@ function createBot (options = {}) {
         console.log(err)
       }
     })
+  }
+  if (options.reconnect) {
+    bot.once('kicked', () => setTimeout(() => createBot(options), options.reconnectTimeOut))
   }
 
   pluginLoader(bot, options)
